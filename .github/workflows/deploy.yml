@@ -12,7 +12,6 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -21,7 +20,7 @@ jobs:
   build-and-deploy:
     environment:
       name: github-pages
-      url: ${{ steps: deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Site Repo
@@ -30,7 +29,8 @@ jobs:
       - name: Fetch Organization README
         run: |
           curl -L https://raw.githubusercontent.com/Cyber-Threat-Hunting-Playground/.github/main/profile/README.md -o index.md
-          sed -i '1i ---\nlayout: default\ntitle: Home\n---\n' index.md
+          # Adding Jekyll Front Matter
+          echo -e "---\nlayout: default\ntitle: Home\n---\n$(cat index.md)" > index.md
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
