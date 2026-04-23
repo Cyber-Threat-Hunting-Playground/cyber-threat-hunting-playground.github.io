@@ -3,9 +3,7 @@ name: Deploy Organization README to Pages
 on:
   push:
     branches: ["main"]
-  # Allows manual triggering of the workflow
   workflow_dispatch:
-  # Automatically syncs the content once a day
   schedule:
     - cron: '0 0 * * *'
 
@@ -14,19 +12,24 @@ permissions:
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
   build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps: deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Site Repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Fetch Organization README
         run: |
-          # Download the raw version of the organization profile README
           curl -L https://raw.githubusercontent.com/Cyber-Threat-Hunting-Playground/.github/main/profile/README.md -o index.md
-          
-          # Optional: Add Jekyll Front Matter to ensure proper rendering
           sed -i '1i ---\nlayout: default\ntitle: Home\n---\n' index.md
 
       - name: Setup Pages
